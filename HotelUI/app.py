@@ -43,10 +43,22 @@ def login_required(role=None):
 def login():
     if request.method == 'POST':
         role = request.form.get('role')
-        user_id = request.form.get('user_id', 1) # Varsayılan olarak ID 1
+        user_id = request.form.get('user_id', 1)
+        
+        db = get_db()
+        cur = db.cursor(dictionary=True)
+        cur.execute("SELECT Full_Name FROM USERS WHERE User_ID = %s", (user_id,))
+        user = cur.fetchone()
+        cur.close()
+        db.close()
+        
+        if not user:
+            flash('Kullanıcı bulunamadı!', 'error')
+            return redirect(url_for('login'))
+            
         session['role'] = role
         session['user_id'] = user_id
-        session['user_name'] = 'Admin' if role == 'Employer' else 'Misafir'
+        session['user_name'] = user['Full_Name']
         flash(f'{role} olarak giriş yapıldı.', 'success')
         return redirect(url_for('dashboard'))
     return render_template('login.html')
@@ -80,8 +92,10 @@ def dashboard():
     else:
         # Customer specific stats
         cur.execute("""
-            SELECT COUNT(*) AS c FROM BOOKING_DETAILS 
-            WHERE Guest_ID = %s
+            SELECT COUNT(*) AS c 
+            FROM BOOKING_DETAILS bd
+            JOIN GUESTS g ON g.Guest_ID = bd.Guest_ID
+            WHERE g.User_ID = %s
         """, (session['user_id'],))
         data['my_bookings_count'] = cur.fetchone()['c']
         
@@ -91,7 +105,8 @@ def dashboard():
             JOIN ROOMS r ON r.Room_ID = b.Room_ID
             JOIN PROPERTIES p ON p.Property_ID = r.Property_ID
             JOIN BOOKING_DETAILS bd ON bd.Booking_ID = b.Booking_ID
-            WHERE bd.Guest_ID = %s
+            JOIN GUESTS g ON g.Guest_ID = bd.Guest_ID
+            WHERE g.User_ID = %s
             ORDER BY b.CheckIn_Date DESC LIMIT 1
         """, (session['user_id'],))
         data['last_booking'] = cur.fetchone()
