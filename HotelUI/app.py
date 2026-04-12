@@ -1,15 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import mysql.connector
 from mysql.connector import Error
+import os
+from dotenv import load_dotenv
+
+# .env dosyasını yükle
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'hotel_management_secret_key'
+app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
 
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'mysql1234',  # MySQL root şifrenizi buraya yazın
-    'database': 'hotel_management',
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'user': os.getenv('DB_USER', 'root'),
+    'password': os.getenv('DB_PASSWORD', ''),
+    'database': os.getenv('DB_NAME', 'hotel_management'),
     'charset': 'utf8mb4',
     'collation': 'utf8mb4_general_ci',
     'use_unicode': True
