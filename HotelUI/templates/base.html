@@ -16,17 +16,32 @@
         <ul class="nav-links">
             <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">
                 <span class="icon">📊</span> Dashboard</a></li>
+            
+            {% if session.role == 'Employer' %}
+            <li class="nav-label">İşveren Menüsü</li>
             <li><a href="/guests" class="{% if request.path == '/guests' %}active{% endif %}">
                 <span class="icon">👥</span> Guest Lookup</a></li>
             <li><a href="/properties" class="{% if request.path == '/properties' %}active{% endif %}">
                 <span class="icon">🏠</span> Properties</a></li>
+            {% endif %}
+
+            {% if session.role == 'Customer' %}
+            <li class="nav-label">Müşteri Menüsü</li>
             <li><a href="/manage-booking" class="{% if request.path == '/manage-booking' %}active{% endif %}">
-                <span class="icon">📅</span> Manage Bookings</a></li>
+                <span class="icon">📅</span> Rezervasyonlarım</a></li>
             <li><a href="/payments" class="{% if request.path == '/payments' %}active{% endif %}">
-                <span class="icon">💳</span> Payments</a></li>
+                <span class="icon">💳</span> Ödeme Yap</a></li>
+            {% endif %}
         </ul>
         <div class="sidebar-footer">
-            <p>CSE 204 Project</p>
+            <div class="user-info">
+                <div class="user-badge {{ session.role | lower }}">
+                    {{ session.role }}
+                </div>
+            </div>
+            <a href="/logout" class="logout-link">
+                <span class="icon">🚪</span> Çıkış Yap
+            </a>
         </div>
     </nav>
 
