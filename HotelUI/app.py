@@ -175,9 +175,19 @@ def manage_booking():
             flash(f'Booking #{booking_id} dates updated successfully.', 'success')
 
         elif action == 'delete':
-            cur.execute("DELETE FROM BOOKINGS WHERE Booking_ID=%s", (booking_id,))
-            db.commit()
-            flash(f'Booking #{booking_id} removed successfully.', 'success')
+            # Önce yetki kontrolü (bu rezervasyon gerçekten bu kullanıcıya mı ait?)
+            cur.execute("""
+                SELECT 1 FROM BOOKING_DETAILS bd
+                JOIN GUESTS g ON g.Guest_ID = bd.Guest_ID
+                WHERE bd.Booking_ID = %s AND g.User_ID = %s
+            """, (booking_id, session['user_id']))
+            
+            if cur.fetchone():
+                cur.execute("DELETE FROM BOOKINGS WHERE Booking_ID=%s", (booking_id,))
+                db.commit()
+                flash(f'Booking #{booking_id} removed successfully.', 'success')
+            else:
+                flash('Yetkisiz işlem!', 'error')
 
         cur.close()
         db.close()
@@ -193,8 +203,9 @@ def manage_booking():
         JOIN BOOKING_DETAILS bd ON bd.Booking_ID = b.Booking_ID AND bd.Is_Primary = TRUE
         JOIN GUESTS g ON g.Guest_ID = bd.Guest_ID
         JOIN USERS u ON u.User_ID = g.User_ID
+        WHERE u.User_ID = %s
         ORDER BY b.CheckIn_Date DESC
-    """)
+    """, (session['user_id'],))
     bookings = cur.fetchall()
     cur.close()
     db.close()
@@ -241,8 +252,9 @@ def payments_page():
         JOIN BOOKING_DETAILS bd ON bd.Booking_ID = b.Booking_ID AND bd.Is_Primary = TRUE
         JOIN GUESTS g ON g.Guest_ID = bd.Guest_ID
         JOIN USERS u ON u.User_ID = g.User_ID
+        WHERE u.User_ID = %s
         ORDER BY b.Booking_ID
-    """)
+    """, (session['user_id'],))
     bookings = cur.fetchall()
 
     cur.execute("""
@@ -250,7 +262,8 @@ def payments_page():
         FROM PAYMENT_METHODS pm
         JOIN GUESTS g ON g.Guest_ID = pm.Guest_ID
         JOIN USERS u ON u.User_ID = g.User_ID
-    """)
+        WHERE u.User_ID = %s
+    """, (session['user_id'],))
     methods = cur.fetchall()
 
     cur.execute("""
@@ -265,8 +278,9 @@ def payments_page():
         JOIN GUESTS g ON g.Guest_ID = bd.Guest_ID
         JOIN USERS u ON u.User_ID = g.User_ID
         LEFT JOIN PAYMENT_METHODS pm ON pm.Method_ID = p.Method_ID
+        WHERE u.User_ID = %s
         ORDER BY p.Payment_Date DESC
-    """)
+    """, (session['user_id'],))
     payments = cur.fetchall()
 
     cur.close()
