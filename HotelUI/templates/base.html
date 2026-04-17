@@ -1,60 +1,97 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Hotel Management{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>{% block title %}Airbnb Clone{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo">🏨</div>
-            <h2>Hotel<span>MS</span></h2>
-        </div>
-        <ul class="nav-links">
-            <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">
-                <span class="icon">📊</span> Dashboard</a></li>
-            
-            {% if session.role == 'Employer' %}
-            <li class="nav-label">İşveren Menüsü</li>
-            <li><a href="/guests" class="{% if request.path == '/guests' %}active{% endif %}">
-                <span class="icon">👥</span> Guest Lookup</a></li>
-            <li><a href="/properties" class="{% if request.path == '/properties' %}active{% endif %}">
-                <span class="icon">🏠</span> Properties</a></li>
-            {% endif %}
+    <header class="main-header">
+        <div class="header-content container">
+            <a href="/" class="logo">
+                <i class="fa-brands fa-airbnb"></i>
+                <span>airbnb</span>
+            </a>
 
-            {% if session.role == 'Customer' %}
-            <li class="nav-label">Müşteri Menüsü</li>
-            <li><a href="/manage-booking" class="{% if request.path == '/manage-booking' %}active{% endif %}">
-                <span class="icon">📅</span> Rezervasyonlarım</a></li>
-            <li><a href="/payments" class="{% if request.path == '/payments' %}active{% endif %}">
-                <span class="icon">💳</span> Ödeme Yap</a></li>
-            {% endif %}
-        </ul>
-        <div class="sidebar-footer">
-            <div class="user-info">
-                <div class="user-badge {{ session.role | lower }}">
-                    {{ session.role }}
+            <div class="search-bar-container">
+                <div class="search-bar" style="cursor: default;">
+                    <span class="search-item" style="cursor: default;">HMS Plus</span>
+                    <span class="divider"></span>
+                    <span class="search-item guest-btn" style="cursor: default;">Veritabanı Projesi</span>
                 </div>
             </div>
-            <a href="/logout" class="logout-link">
-                <span class="icon">🚪</span> Çıkış Yap
-            </a>
-        </div>
-    </nav>
 
-    <main class="content">
+            <div class="user-menu">
+                <div class="profile-dropdown" id="userMenuBtn">
+                    <i class="fa-solid fa-bars"></i>
+                    <div class="user-avatar">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    
+                    <div class="dropdown-content" id="userDropdown">
+                        {% if session.get('user_id') %}
+                            <p class="welcome-text">Merhaba, {{ session.get('user_name') }}</p>
+                            <hr>
+                            <a href="{{ url_for('dashboard') }}">Panel</a>
+                            {% if session.get('role') == 'admin' %}
+                                <a href="{{ url_for('admin_dashboard') }}">Admin Paneli</a>
+                            {% endif %}
+                            <hr>
+                            <a href="{{ url_for('logout') }}" class="logout-item">Çıkış yap</a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}">Oturum açın</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content container">
         {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
-        {% endif %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
         {% endwith %}
 
         {% block content %}{% endblock %}
     </main>
+
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-left">
+                <span>© 2026 HMS Database Project.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple Dropdown Toggle
+        const menuBtn = document.getElementById('userMenuBtn');
+        const dropdown = document.getElementById('userDropdown');
+        
+        if (menuBtn) {
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+            });
+        }
+
+        window.addEventListener('click', () => {
+            if (dropdown && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

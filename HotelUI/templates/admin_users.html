@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Kullanıcı Yönetimi - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_dashboard') }}">Admin</a> / Kullanıcılar
+        </div>
+        <h1>Kullanıcı Yönetimi</h1>
+    </div>
+
+    <div class="table-container shadow-sm">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Ad Soyad</th>
+                    <th>E-posta</th>
+                    <th>Rol</th>
+                    <th>Durum</th>
+                    <th>Kayıt Tarihi</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>#{{ user.user_id }}</td>
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <form action="{{ url_for('admin_update_user', id=user.user_id) }}" method="POST" class="inline-form">
+                            <select name="role" onchange="this.form.submit()" class="admin-select">
+                                <option value="guest" {% if user.role == 'guest' %}selected{% endif %}>Misafir</option>
+                                <option value="host" {% if user.role == 'host' %}selected{% endif %}>Ev Sahibi</option>
+                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td>
+                        <form action="{{ url_for('admin_update_user', id=user.user_id) }}" method="POST" class="inline-form">
+                            <input type="hidden" name="role" value="{{ user.role }}">
+                            <select name="status" onchange="this.form.submit()" class="admin-select">
+                                <option value="active" {% if user.account_status == 'active' %}selected{% endif %}>Aktif</option>
+                                <option value="inactive" {% if user.account_status == 'inactive' %}selected{% endif %}>İnaktif</option>
+                                <option value="suspended" {% if user.account_status == 'suspended' %}selected{% endif %}>Askıda</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '' }}</td>
+                    <td>
+                        <form action="{{ url_for('admin_delete_user', id=user.user_id) }}" method="POST" onsubmit="return confirm('Bu kullanıcıyı ve tüm verilerini silmek istediğinize emin misiniz?')" style="margin: 0;">
+                            <button type="submit" class="btn-delete-user" title="Kullanıcıyı Sil">
+                                <i class="fa-solid fa-user-slash"></i> Sil
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .admin-container { padding: 2rem 0; }
+    .breadcrumb { color: #717171; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .breadcrumb a { color: #007bff; text-decoration: none; }
+    
+    .admin-table { width: 100%; border-collapse: collapse; background: white; }
+    .admin-table th, .admin-table td { padding: 1.25rem 1rem; text-align: left; border-bottom: 1px solid #eee; }
+    .admin-table th { background: #f8f9fa; font-weight: 600; }
+
+    .admin-select {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        font-size: 0.85rem;
+        background: white;
+        cursor: pointer;
+    }
+
+    .admin-select:focus {
+        border-color: #ff385c;
+        outline: none;
+    }
+
+    .inline-form { display: inline-block; margin: 0; }
+
+    .btn-delete-user {
+        background: none;
+        border: 1px solid #ef4444;
+        color: #ef4444;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-delete-user:hover {
+        background: #ef4444;
+        color: white;
+    }
+</style>
+{% endblock %}

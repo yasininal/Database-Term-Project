@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}{{ property.title }} - Airbnb Clone{% endblock %}
+
+{% block extra_css %}
+<style>
+    .property-header {
+        margin-top: 24px;
+        margin-bottom: 24px;
+    }
+    .property-header h1 {
+        font-size: 26px;
+        font-weight: 600;
+    }
+    .header-sub {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        grid-template-rows: 200px 200px;
+        gap: 8px;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 48px;
+    }
+    .gallery-item {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .gallery-item.main {
+        grid-row: span 2;
+    }
+    .property-main-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 80px;
+    }
+    .host-info {
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 24px;
+    }
+    .details-list {
+        list-style: none;
+        padding: 32px 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .details-list li {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .details-list i {
+        font-size: 24px;
+        color: var(--text);
+    }
+    .amenities-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 24px;
+    }
+    .amenity-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 16px;
+    }
+    /* Booking Card */
+    .booking-card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 100px;
+    }
+    .booking-price {
+        font-size: 22px;
+        margin-bottom: 24px;
+    }
+    .booking-price span {
+        font-weight: 700;
+    }
+    .booking-inputs {
+        border: 1px solid #717171;
+        border-radius: 8px;
+        margin-bottom: 16px;
+    }
+    .input-group {
+        display: flex;
+        border-bottom: 1px solid #717171;
+    }
+    .input-group .sub-input {
+        flex: 1;
+        padding: 10px;
+    }
+    .input-group .sub-input:first-child {
+        border-right: 1px solid #717171;
+    }
+    .input-label {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 4px;
+    }
+    .date-field {
+        width: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-family: inherit;
+        font-size: 14px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="/" class="btn-back"><i class="fa-solid fa-chevron-left"></i> Geri</a>
+<div class="property-header">
+    <h1>{{ property.title }}</h1>
+    <div class="header-sub">
+        <div>
+            <i class="fa-solid fa-star"></i> {{ property.avg_rating or 'Yeni' }} 
+            &nbsp;·&nbsp; 
+            <span>{{ reviews|length }} yorum</span>
+            &nbsp;·&nbsp;
+            <span>{{ property.city }}, {{ property.district }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="gallery-grid">
+    {% for photo in photos %}
+        {% if photo.image_url.startswith('http') %}
+            <img src="{{ photo.image_url }}" class="gallery-item {% if loop.first %}main{% endif %}" alt="Property view">
+        {% else %}
+            <img src="{{ url_for('static', filename=photo.image_url) }}" class="gallery-item {% if loop.first %}main{% endif %}" alt="Property view">
+        {% endif %}
+    {% endfor %}
+</div>
+
+<div class="property-main-content">
+    <div class="left-col">
+        <div class="host-info">
+            <h2>{{ property.host_name }} tarafındanki {{ property.property_type }}</h2>
+            <p>{{ property.max_guests }} misafir · {{ property.bedroom_count }} yatak odası · {{ property.bathroom_count }} banyo</p>
+        </div>
+
+        <ul class="details-list">
+            <li>
+                <i class="fa-solid fa-key"></i>
+                <div>
+                    <strong>Mükemmel giriş deneyimi</strong>
+                    <p style="color: var(--text-light); font-size: 14px;">Son misafirlerin %100'ü giriş sürecine 5 yıldız verdi.</p>
+                </div>
+            </li>
+            <li>
+                <i class="fa-solid fa-location-dot"></i>
+                <div>
+                    <strong>Harika konum</strong>
+                    <p style="color: var(--text-light); font-size: 14px;">Son misafirlerin %95'i buranın konumunu harika buldu.</p>
+                </div>
+            </li>
+        </ul>
+
+        <div style="padding: 32px 0; border-bottom: 1px solid var(--border);">
+            <p style="font-size: 16px;">{{ property.description }}</p>
+        </div>
+
+        <div style="padding: 32px 0;">
+            <h2>Burada sunulan olanaklar</h2>
+            <div class="amenities-grid">
+                {% for amenity in amenities %}
+                <div class="amenity-item">
+                    <i class="fa-solid {{ amenity.icon or 'fa-check' }}"></i>
+                    <span>{{ amenity.name }}</span>
+                </div>
+                {% else %}
+                <p>Olanak belirtilmedi.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="right-col">
+        <div class="booking-card">
+            <div class="booking-price">
+                <span>₺{{ property.base_price }}</span> gece
+            </div>
+            
+            <form action="{{ url_for('book_property', id=property.property_id) }}" method="POST">
+                <div class="booking-inputs">
+                    <div class="input-group">
+                        <div class="sub-input">
+                            <label class="input-label">GİRİŞ</label>
+                            <input type="text" name="check_in" id="check_in" placeholder="Tarih ekleyin" required readonly class="date-field">
+                        </div>
+                        <div class="sub-input">
+                            <label class="input-label">ÇIKIŞ</label>
+                            <input type="text" name="check_out" id="check_out" placeholder="Tarih ekleyin" required readonly class="date-field">
+                        </div>
+                    </div>
+                    <div style="padding: 10px;">
+                        <label style="font-size: 10px; font-weight: 800; text-transform: uppercase;">Misafirler</label><br>
+                        <select name="guests" style="width: 100%; border: none; outline: none; background: transparent; font-family: inherit;">
+                            {% for i in range(1, property.max_guests + 1) %}
+                            <option value="{{ i }}">{{ i }} misafir</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-block" style="border-radius: 8px;">Rezerve edin</button>
+            </form>
+            <p style="text-align: center; color: var(--text-light); font-size: 14px; margin-top: 12px;">Henüz sizden tahsilat yapılmayacak</p>
+            
+            <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-weight: 700; font-size: 18px;">
+                <span>Toplam</span>
+                <span id="total_price_display">₺{{ property.base_price }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="padding: 48px 0; border-top: 1px solid var(--border); margin-top: 48px;">
+    <h2>Yorumlar</h2>
+    <div class="amenities-grid">
+        {% for review in reviews %}
+        <div class="card">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div class="user-avatar" style="width: 40px; height: 40px;">{{ review.guest_name[0] }}</div>
+                <div>
+                    <strong>{{ review.guest_name }}</strong><br>
+                    <span style="font-size: 12px; color: var(--text-light);">{{ review.created_at.strftime('%Y %B') if review.created_at else 'Nisan 2026' }}</span>
+                </div>
+            </div>
+            <div style="color: #ff385c; font-size: 12px; margin-bottom: 8px;">
+                {% for i in range(review.rating) %}
+                    <i class="fa-solid fa-star"></i>
+                {% endfor %}
+            </div>
+            <p style="font-size: 14px;">{{ review.comment }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Flatpickr for disabling booked dates -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    const basePrice = {{ property.base_price }};
+    const bookedDates = [
+        {% for range in booked_dates %}
+        { from: "{{ range.check_in }}", to: "{{ range.check_out }}" },
+        {% endfor %}
+    ];
+
+    const configIn = {
+        minDate: "today",
+        disable: bookedDates,
+        dateFormat: "Y-m-d",
+        onChange: function(selectedDates, dateStr) {
+            if (selectedDates.length > 0) {
+                const checkInDate = selectedDates[0];
+                const nextDay = new Date(checkInDate.getTime() + 86400000);
+                
+                // Set minDate for checkout to at least one day after check-in
+                fpOut.set("minDate", nextDay);
+                fpOut.setDate(nextDay);
+                
+                // Find the next booked date to set as maxDate (prevent overlapping)
+                let nextBookingStart = null;
+                const sortedBookings = bookedDates
+                    .map(b => new Date(b.from))
+                    .filter(d => d > checkInDate)
+                    .sort((a, b) => a - b);
+                
+                if (sortedBookings.length > 0) {
+                    fpOut.set("maxDate", sortedBookings[0]);
+                } else {
+                    fpOut.set("maxDate", null);
+                }
+                
+                updateTotal();
+            }
+        }
+    };
+
+    const configOut = {
+        minDate: "today",
+        disable: bookedDates,
+        dateFormat: "Y-m-d",
+        onChange: function() {
+            updateTotal();
+        }
+    };
+
+    const fpIn = flatpickr("#check_in", configIn);
+    const fpOut = flatpickr("#check_out", configOut);
+
+    function updateTotal() {
+        const val1 = document.getElementById('check_in').value;
+        const val2 = document.getElementById('check_out').value;
+        if (val1 && val2) {
+            const d1 = new Date(val1);
+            const d2 = new Date(val2);
+            if (d2 > d1) {
+                const nights = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+                document.getElementById('total_price_display').innerText = '₺' + (basePrice * nights).toLocaleString();
+            } else {
+                document.getElementById('total_price_display').innerText = '₺0';
+            }
+        }
+    }
+</script>
+{% endblock %}

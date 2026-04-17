@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Gelen Rezervasyonlar - Airbnb Clone{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('dashboard') }}" class="btn-back"><i class="fa-solid fa-chevron-left"></i> Panele Dön</a>
+<div style="margin-top: 48px;">
+    <h1>Rezervasyonlar</h1>
+    <h2 style="font-size: 22px; margin-top: 32px; margin-bottom: 24px;">Misafirleriniz</h2>
+    
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Durum</th>
+                    <th>Misafir</th>
+                    <th>Mülk</th>
+                    <th>Giriş</th>
+                    <th>Çıkış</th>
+                    <th>Kişi</th>
+                    <th>Ücret</th>
+                    <th>Tarih</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for res in reservations %}
+                <tr>
+                    <td>
+                        <span class="badge {{ 'badge-success' if res.status == 'confirmed' else 'badge-error' if res.status == 'cancelled' else 'badge-pending' }}" style="display: inline-block; padding: 4px 12px; background: {{ '#E7F3EF' if res.status == 'confirmed' else '#FEECEB' if res.status == 'cancelled' else '#FEF3C7' }}; color: {{ '#1A5E4F' if res.status == 'confirmed' else '#911A13' if res.status == 'cancelled' else '#B45309' }}; border-radius: 16px; font-weight: bold; font-size: 12px;">{{ res.status | capitalize }}</span>
+                    </td>
+                    <td><strong>{{ res.guest_name }}</strong></td>
+                    <td>{{ res.title }}</td>
+                    <td>{{ res.check_in.strftime('%d.%m.%Y') }}</td>
+                    <td>{{ res.check_out.strftime('%d.%m.%Y') }}</td>
+                    <td>{{ res.guest_count }}</td>
+                    <td><strong>₺{{ res.total_price }}</strong></td>
+                    <td style="color: var(--text-light); font-size: 13px;">{{ res.created_at.strftime('%d.%m.%Y') }}</td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            {% if res.status == 'pending' %}
+                            <form action="{{ url_for('host_update_booking', id=res.booking_id) }}" method="POST">
+                                <input type="hidden" name="status" value="confirmed">
+                                <button type="submit" class="btn-action approve" title="Onayla"><i class="fa-solid fa-check"></i></button>
+                            </form>
+                            {% endif %}
+                            
+                            {% if res.status in ['pending', 'confirmed'] %}
+                            <form action="{{ url_for('host_update_booking', id=res.booking_id) }}" method="POST" onsubmit="return confirm('Bu rezervasyonu iptal etmek istediğinize emin misiniz?')">
+                                <input type="hidden" name="status" value="cancelled">
+                                <button type="submit" class="btn-action reject" title="{{ 'Reddet' if res.status == 'pending' else 'İptal Et' }}"><i class="fa-solid fa-xmark"></i></button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 48px; color: var(--text-light);">Henüz rezervasyonunuz bulunmuyor.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

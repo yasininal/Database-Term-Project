@@ -1,63 +1,64 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - HotelMS{% endblock %}
+
+{% block title %}Panel - Airbnb Clone{% endblock %}
+
 {% block content %}
-<div class="page-header">
-    <h1>Dashboard</h1>
-    <p>Hotel Management System Overview</p>
+<div class="page-header" style="margin-bottom: 48px;">
+    <h1 style="font-size: 32px;">Panelim</h1>
+    <p style="font-size: 16px;">Hoş geldiniz, {{ session.user_name }}. Hesabınızı buradan yönetebilirsiniz.</p>
 </div>
 
-{% if session.role == 'Employer' %}
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon">📅</div>
-        <div class="stat-value">{{ bookings }}</div>
-        <div class="stat-label">Total Bookings</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">👥</div>
-        <div class="stat-value">{{ guests }}</div>
-        <div class="stat-label">Registered Guests</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">🏠</div>
-        <div class="stat-value">{{ properties }}</div>
-        <div class="stat-label">Properties</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">💰</div>
-        <div class="stat-value">${{ "%.2f"|format(revenue) }}</div>
-        <div class="stat-label">Total Revenue</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">⭐</div>
-        <div class="stat-value">{{ avg_rating }}</div>
-        <div class="stat-label">Avg. Rating</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">💬</div>
-        <div class="stat-value">{{ reviews }}</div>
-        <div class="stat-label">Reviews</div>
-    </div>
-</div>
-{% else %}
-<div class="card" style="padding: 40px; border-left: 4px solid #60a5fa;">
-    <h2>Merhaba, {{ session.user_name }}! 👋</h2>
-    <p style="color: var(--text-muted); margin-bottom: 30px;">HotelMS üzerinden rezervasyonlarınızı yönetebilir ve ödemelerinizi yapabilirsiniz.</p>
-    
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">📅</div>
-            <div class="stat-value">{{ my_bookings_count }}</div>
-            <div class="stat-label">Rezervasyonlarım</div>
+<div class="property-grid" style="grid-template-columns: repeat(3, 1fr); gap: 32px;">
+    {% if session.role == 'host' %}
+        <div class="card" style="border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+            <i class="fa-solid fa-house-user" style="font-size: 32px; color: var(--primary); margin-bottom: 16px;"></i>
+            <h3 style="margin-bottom: 8px;">{{ stats.properties_count }} İlan</h3>
+            <p style="color: var(--text-light); font-size: 14px;">Aktif olarak kiralanan mülkleriniz.</p>
+            <a href="{{ url_for('host_properties') }}" style="display: block; margin-top: 16px; font-weight: 600; color: var(--text); text-decoration: underline;">İlanları yönet</a>
         </div>
-        {% if last_booking %}
-        <div class="stat-card" style="grid-column: span 2;">
-            <div class="stat-icon">🔔</div>
-            <div class="stat-value" style="font-size: 24px;">{{ last_booking.Title }}</div>
-            <div class="stat-label">Son Rezervasyon - {{ last_booking.CheckIn_Date }}</div>
+        <div class="card" style="border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+            <i class="fa-solid fa-calendar-check" style="font-size: 32px; color: var(--primary); margin-bottom: 16px;"></i>
+            <h3 style="margin-bottom: 8px;">{{ stats.reservations_count }} Rezervasyon</h3>
+            <p style="color: var(--text-light); font-size: 14px;">Gelecek olan misafirlerinizin sayısı.</p>
+            <a href="{{ url_for('host_reservations') }}" style="display: block; margin-top: 16px; font-weight: 600; color: var(--text); text-decoration: underline;">Tümünü gör</a>
+        </div>
+        <div class="card" style="border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+            <i class="fa-solid fa-money-bill-trend-up" style="font-size: 32px; color: #22c55e; margin-bottom: 16px;"></i>
+            <h3 style="margin-bottom: 8px;">₺{{ stats.total_earnings|round|int }} Kazanç</h3>
+            <p style="color: var(--text-light); font-size: 14px;">Onaylanmış rezervasyonlardan toplam gelir.</p>
+            <a href="{{ url_for('host_reservations') }}" style="display: block; margin-top: 16px; font-weight: 600; color: var(--text); text-decoration: underline;">Detaylar</a>
+        </div>
+        <div class="card" style="border: 1px solid var(--border); border-radius: 12px; padding: 24px; background-color: #f0f9ff;">
+            <i class="fa-solid fa-suitcase" style="font-size: 32px; color: #0ea5e9; margin-bottom: 16px;"></i>
+            <h3 style="margin-bottom: 8px;">Seyahatlerim</h3>
+            <p style="color: var(--text-light); font-size: 14px;">Kendi yaptığınız rezervasyonları yönetin.</p>
+            <a href="{{ url_for('my_bookings') }}" style="display: block; margin-top: 16px; font-weight: 600; color: var(--text); text-decoration: underline;">Seyahatleri gör</a>
+        </div>
+
+    {% else %}
+        <div class="card" style="border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+            <i class="fa-solid fa-suitcase" style="font-size: 32px; color: var(--primary); margin-bottom: 16px;"></i>
+            <h3 style="margin-bottom: 8px;">{{ stats.my_bookings_count }} Seyahat</h3>
+            <p style="color: var(--text-light); font-size: 14px;">Geçmiş ve yaklaşan tüm seyahatleriniz.</p>
+            <a href="{{ url_for('my_bookings') }}" style="display: block; margin-top: 16px; font-weight: 600; color: var(--text); text-decoration: underline;">Planları incele</a>
+        </div>
+
+        {% if session.role == 'admin' %}
+        <div class="card" style="border: 1px solid var(--border); border-radius: 12px; padding: 24px; background-color: #f8fafc;">
+            <i class="fa-solid fa-gauge-high" style="font-size: 32px; color: #6366f1; margin-bottom: 16px;"></i>
+            <h3 style="margin-bottom: 8px;">Yönetim Paneli</h3>
+            <p style="color: var(--text-light); font-size: 14px;">Sistem genelini yönetmek için yönetici konsoluna geçin.</p>
+            <a href="{{ url_for('admin_dashboard') }}" style="display: block; margin-top: 16px; font-weight: 600; color: #6366f1; text-decoration: underline;">Yönetici Paneline Git</a>
         </div>
         {% endif %}
-    </div>
+
+        <div class="card" style="border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+            <i class="fa-solid fa-credit-card" style="font-size: 32px; color: #ff385c; margin-bottom: 16px;"></i>
+            <h3 style="margin-bottom: 8px;">Ödeme Yöntemlerim</h3>
+            <p style="color: var(--text-light); font-size: 14px;">Kayıtlı banka ve kredi kartlarınızı yönetin.</p>
+            <a href="{{ url_for('manage_cards') }}" style="display: block; margin-top: 16px; font-weight: 600; color: var(--text); text-decoration: underline;">Kartları yönet</a>
+        </div>
+
+    {% endif %}
 </div>
-{% endif %}
 {% endblock %}

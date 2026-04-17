@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Sistem Raporları - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_dashboard') }}">Admin</a> / Raporlar
+        </div>
+        <h1>Sistem Raporları (SQL Analizleri)</h1>
+        <p>Hocanın istediği karmaşık sorgular ve View'lar üzerinden üretilen raporlar.</p>
+    </div>
+
+    <!-- Section 1: Property Analytics -->
+    <div class="report-section card shadow-sm" style="margin-bottom: 32px; padding: 24px; background: white; border-radius: 12px;">
+        <h2 style="margin-bottom: 16px; color: var(--primary);"><i class="fa-solid fa-chart-simple"></i> Mülk Analitiği (Join + Group By)</h2>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Mülk Başlığı</th>
+                    <th>Şehir</th>
+                    <th>Yorum Sayısı</th>
+                    <th>Ort. Puan</th>
+                    <th>Tamamlanan Konaklama</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in analytics %}
+                <tr>
+                    <td>{{ item.title }}</td>
+                    <td>{{ item.city }}</td>
+                    <td>{{ item.review_count }}</td>
+                    <td>{{ item.average_rating or '---' }}</td>
+                    <td>{{ item.total_stays }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- New Requirement: Property & Host Booking Summary -->
+    <div class="report-section card shadow-sm" style="margin-bottom: 32px; padding: 24px; background: white; border-radius: 12px;">
+        <h2 style="margin-bottom: 16px; color: var(--primary);"><i class="fa-solid fa-list-check"></i> Mülk & Rezervasyon Özeti</h2>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Mülk</th>
+                    <th>Ev Sahibi</th>
+                    <th>Toplam Rezervasyon</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in booking_summary %}
+                <tr>
+                    <td>{{ item.property_title }}</td>
+                    <td>{{ item.host_name }}</td>
+                    <td>{{ item.total_bookings }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- New Requirement: Monthly Guest Tracking -->
+    <div class="report-section card shadow-sm" style="margin-bottom: 32px; padding: 24px; background: white; border-radius: 12px;">
+        <h2 style="margin-bottom: 16px; color: var(--primary);"><i class="fa-solid fa-users-viewfinder"></i> Aylık Misafir Takibi (Ay/Yıl Bazlı)</h2>
+        <form action="{{ url_for('admin_reports') }}" method="GET" style="display: flex; gap: 16px; margin-bottom: 20px;">
+            <select name="month" style="padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+                <option value="">Ay Seçin</option>
+                {% for i in range(1, 13) %}
+                <option value="{{ i }}" {% if request.args.get('month') == i|string %}selected{% endif %}>{{ i }}. Ay</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-sm">Filtrele</button>
+        </form>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Mülk</th>
+                    <th>Asıl Misafir</th>
+                    <th>Yanındaki Misafir</th>
+                    <th>Yakınlık</th>
+                    <th>Giriş Tarihi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for guest in guest_tracker %}
+                <tr>
+                    <td>{{ guest.property_title }}</td>
+                    <td>{{ guest.primary_guest_name }}</td>
+                    <td>{{ guest.additional_guest_name or '---' }}</td>
+                    <td>{{ guest.relationship or '---' }}</td>
+                    <td>{{ guest.check_in }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" style="text-align: center; color: #717171;">Bu kriterlere uygun kayıt bulunamadı.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .admin-container { padding: 2rem 0; }
+    .breadcrumb { color: #717171; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .breadcrumb a { color: #007bff; text-decoration: none; }
+    .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+    .admin-table th { background: #f8f9fa; font-weight: 600; }
+</style>
+{% endblock %}
