@@ -26,7 +26,17 @@
                     </label>
                     {% endfor %}
                 </div>
-                <button type="submit" class="btn-pay">Pay ₺{{ booking.total_price }}</button>
+
+                <div class="form-group">
+                    <label><i class="fa-solid fa-receipt"></i> Payment Plan</label>
+                    <select name="installments" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; background: white;">
+                        <option value="1">Single Payment (Full Amount)</option>
+                        <option value="3">3 Installments (₺{{ (booking.total_price / 3)|round(2) }} / month)</option>
+                        <option value="6">6 Installments (₺{{ (booking.total_price / 6)|round(2) }} / month)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-pay" style="margin-top: 16px;">Pay ₺{{ booking.total_price }}</button>
             </form>
             {% endif %}
 
@@ -59,6 +69,18 @@
                     
                     <input type="hidden" name="payment_method" value="credit_card">
                     <input type="hidden" name="amount" value="{{ booking.total_price }}">
+
+                    <div class="form-group" style="margin-top: 24px;">
+                        <label><i class="fa-solid fa-receipt"></i> Payment Plan</label>
+                        <select name="installments" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; background: white;">
+                            <option value="1">Single Payment (Full Amount)</option>
+                            <option value="3">3 Installments (₺{{ (booking.total_price / 3)|round(2) }} / month)</option>
+                            <option value="6">6 Installments (₺{{ (booking.total_price / 6)|round(2) }} / month)</option>
+                            <option value="9">9 Installments (₺{{ (booking.total_price / 9)|round(2) }} / month)</option>
+                            <option value="12">12 Installments (₺{{ (booking.total_price / 12)|round(2) }} / month)</option>
+                        </select>
+                        <p style="font-size: 12px; color: #717171; margin-top: 8px;">* No interest will be applied for the demo.</p>
+                    </div>
                     
                     <button type="submit" class="btn-pay" style="margin-top: 24px; width: 100%; padding: 14px; font-size: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Pay ₺{{ booking.total_price }}</button>
                 </form>

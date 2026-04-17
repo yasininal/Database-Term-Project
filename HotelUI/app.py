@@ -574,16 +574,28 @@ def checkout(booking_id):
                 cur.execute("INSERT INTO UserCards (user_id, card_holder, card_number_masked, expiry_date) VALUES (%s, %s, %s, %s)", 
                            (session['user_id'], card_holder, masked, expiry))
         
+        # Process installments if selected
+        installment_count = int(request.form.get('installments', 1))
+        
         cur.execute("""
             INSERT INTO Payments (booking_id, amount, payment_method, payment_status, transaction_ref)
             VALUES (%s, %s, %s, 'completed', %s)
         """, (booking_id, amount, method, 'TRANS-' + str(booking_id)))
+        payment_id = cur.lastrowid
         
-        # Update booking status to confirmed if it was confirmed (it should be confirmed to pay)
-        # Actually it's already confirmed if host approved.
+        if installment_count > 1:
+            installment_amount = float(amount) / installment_count
+            from datetime import timedelta, datetime
+            for i in range(1, installment_count + 1):
+                due_date = datetime.now() + timedelta(days=30 * (i - 1))
+                cur.execute("""
+                    INSERT INTO Installments (payment_id, installment_number, amount, due_date, status)
+                    VALUES (%s, %s, %s, %s, 'pending')
+                """, (payment_id, i, installment_amount, due_date.strftime('%Y-%m-%d')))
         
         db.commit()
-        flash('Payment received successfully!', 'success')
+        msg = f"Payment received! Split into {installment_count} installments." if installment_count > 1 else "Payment received successfully!"
+        flash(msg, 'success')
         return redirect(url_for('my_bookings'))
 
     cur.execute("""
