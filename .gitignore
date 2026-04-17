@@ -11,4 +11,5 @@ venv.bak/
 .vscode/
 .idea/
 *.log
-HotelUI/models/sentiment_model/ 
+# AI Models
+HotelUI/models/
