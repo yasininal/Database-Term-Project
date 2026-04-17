@@ -758,9 +758,9 @@ def submit_review(booking_id):
         db.commit()
         
         if ai_result['status'] == 'REJECTED':
-            flash('Yorumunuz uygunsuz dil içerdiği için reddedildi.', 'error')
+            flash('Your review was rejected due to inappropriate language.', 'error')
         else:
-            flash(f'Yorumunuz kaydedildi! Duygu analizi: {ai_result["sentiment"].capitalize()}.', 'success')
+            flash(f'Your review has been saved! AI Sentiment: {ai_result["sentiment"].capitalize()}.', 'success')
         
     cur.close()
     db.close()
