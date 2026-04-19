@@ -366,6 +366,10 @@ def admin_reports():
         GROUP BY payment_day ORDER BY payment_day
     """)
     daily_revenue = cur.fetchall()
+    
+    # Convert Decimal to float for JSON serialization
+    for row in daily_revenue:
+        row['revenue'] = float(row['revenue'])
 
     # Chart data: bookings by city
     cur.execute("""
@@ -387,7 +391,7 @@ def admin_reports():
         ai_reviews=all_reviews,
         sentiment_counts=sentiment_counts,
         rating_dist=rating_dist,
-        monthly_revenue=daily_revenue, # Keeping the template variable name for compatibility but content is daily
+        monthly_revenue=daily_revenue, # Pass the list with floats
         city_bookings=city_bookings
     )
 @app.route('/property/<int:id>')
